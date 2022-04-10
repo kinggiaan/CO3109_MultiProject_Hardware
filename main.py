@@ -2,8 +2,7 @@
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-#TODO: 1. herculous dua data len | CHECKED
-#TODO: 2. get weather data in python
+
 
 import random
 # import pyowm  # import Python Open Weather Map to our project.
@@ -12,6 +11,8 @@ import serial.tools.list_ports
 import time
 import sys
 import requests
+import json
+import  Storage
 # from Adafruit_IO import MQTTClient
 
 AIO_FEED_ID = ["multi-projct.button", "multi-projct.sound"]
@@ -71,9 +72,16 @@ def readSerial():
                 mess = mess[end+1:]
 
 
-count30s=30
+#count30s=30
 while True:
     if isMicrobitConnected:
         readSerial()
 
+    my_url = "https://thay-tam.herokuapp.com/api/v1/machine/order_queue"
+    headers = {"Content-Type": "application/json",
+               "HTTP_X_MACHINE_UUID ": "uuid d89647bf-ebdb-53c5-ae26-99d5256439c5"}
+    r = requests.get(url=my_url, headers=headers)
+
+    print(r)
+    print(r.json())
     time.sleep(1)
