@@ -48,11 +48,14 @@ def processData(data):
     data = data.replace("#", "")
     splitData = data.split(":")
     print(splitData)
-    if splitData[0] == "BUTTON":
-        r = requests.get('https://thay-tam.herokuapp.com/api/v1/ping')
-        print('Gui request thanh cong')
-        print(r)
-        print(r.json())
+    if splitData[0] == "BUTTON": #de nha sp ra va relay nhay on off on
+        # r = requests.get('https://thay-tam.herokuapp.com/api/v1/ping')
+        # print('Gui request thanh cong')
+        # print(r)
+        # print(r.json())
+        Machine_ReleasePro(2)
+        #ser.write(("BUTTON" + "#").encode())
+
     # if splitData[0] == "HUMI":
         # client.publish("multi-projct.sound", splitData[1])
 
@@ -72,20 +75,44 @@ def readSerial():
             else:
                 mess = mess[end+1:]
 
+def Machine_ReleasePro(locate):
+    ser.write((str(locate) + "#").encode())
+    ser.write(("RELAY" + "#").encode())
 
-#count30s=30
-while True:
-    if isMicrobitConnected:
-        readSerial()
 
+def Machine_Check_Order_Queue():
     my_url = "https://thay-tam.herokuapp.com/api/v1/machine/order_queue"
     headers = {"Content-Type": "application/json",
                "X-MACHINE-UUID ": "uuid d89647bf-ebdb-53c5-ae26-99d5256439c5"}
     r = requests.get(url=my_url, headers=headers)
 
-    print(r)
     print(r.json())
+    order = r.json()
+    print(order[0]["order_id"])
 
-    print(STO.Qty_find(STO,"Dasani"))
-    print(STO.Prod_add(STO,"Cream",5,1))
+
+
+count30s=5
+while True:
+    if isMicrobitConnected:
+        readSerial()
+
+    if count30s <=0 :
+        ser.write(("RESTART" + "#").encode())
+    else:
+        count30s -= 1
+    # my_url = "https://thay-tam.herokuapp.com/api/v1/machine/order_queue"
+    # headers = {"Content-Type": "application/json",
+    #            "X-MACHINE-UUID ": "uuid d89647bf-ebdb-53c5-ae26-99d5256439c5"}
+    # r = requests.get(url=my_url, headers=headers)
+
+
+    # print(r)
+    # print(r.json())
+    # order = r.json()
+    # print(order[0]["order_id"])
+
+
+    # print(STO.Qty_find(STO,"Dasani"))
+    # print(STO.Prod_add(STO,"Cream",5,1))
     time.sleep(1)
