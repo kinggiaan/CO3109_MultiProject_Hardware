@@ -12,12 +12,13 @@ import time
 import sys
 import requests
 import json
-import  Storage
+import  Storage as STO
 # from Adafruit_IO import MQTTClient
 
 AIO_FEED_ID = ["multi-projct.button", "multi-projct.sound"]
 AIO_USERNAME = "kinggiaan"
 AIO_KEY = "aio_oyFJ6970b4VKFcRDqBkU3Y7gkTse"
+
 
 def getPort():
     ports = serial.tools.list_ports.comports()
@@ -79,9 +80,12 @@ while True:
 
     my_url = "https://thay-tam.herokuapp.com/api/v1/machine/order_queue"
     headers = {"Content-Type": "application/json",
-               "HTTP_X_MACHINE_UUID ": "uuid d89647bf-ebdb-53c5-ae26-99d5256439c5"}
+               "X-MACHINE-UUID ": "uuid d89647bf-ebdb-53c5-ae26-99d5256439c5"}
     r = requests.get(url=my_url, headers=headers)
 
     print(r)
     print(r.json())
+
+    print(STO.Qty_find(STO,"Dasani"))
+    print(STO.Prod_add(STO,"Cream",5,1))
     time.sleep(1)
