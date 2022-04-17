@@ -1,9 +1,16 @@
 # class Storage:
-machine_storage = [{"name":"Dasani", "locate": 1, "qty": 2},
+machine_storage = [{"name":"Dasani", "locate": 1, "qty": 0},
                        {"name":"NutriBoost", "locate": 2, "qty": 0},
                        {"name":"Sting", "locate": 3, "qty": 1},
-                        {"name":"Black Coffee", "locate": 4, "qty": 10}
+                       {"name":"Black Coffee", "locate": 4, "qty": 10}
                    ]
+
+
+# Return information
+def Product_find(self, name ):
+    for storage in machine_storage:
+        if storage["name"] == name:
+            return storage
 
 #Quantitive Function
 def Qty_find(self, name ):
@@ -16,6 +23,10 @@ def Qty_update(self,name,n_qty):
         if storage["name"] == name:
             storage["qty"] = n_qty
 
+def Qty_realese(self, name,qty):
+    for storage in machine_storage:
+        if storage["name"] == name:
+            storage["qty"] -= qty
 #Locate Function
 
 def Locate_find(seft, name):
