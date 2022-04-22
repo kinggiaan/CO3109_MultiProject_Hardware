@@ -61,13 +61,7 @@ def processData(data):
     splitData[0] = input(str)
     if splitData[0] == "BUTTON" and process_order == 1 and wait_release ==1 : #de nha sp ra va relay nhay on off on
         Machine_ReleasePro(product_info["name"], product_info["locate"], order[0]["quantity"])
-        wait_release = 0
-        process_order = 0
-        del order[0]
-        print(order)
-        print("Next order!!!")
-
-
+        Request_Delete_Order()
 
 
 mess = ""
@@ -93,8 +87,25 @@ def Request_Oder_Queue():
     r = requests.get(url=my_url, headers=headers)
     print(r.json())
     order = r.json()
-
     print("")
+def Request_Delete_Order(order_id):
+
+    global order
+
+    my_url = "https://thay-tam.herokuapp.com//api/v1/machine/clear_order"
+    headers = {"Content-Type": "application/json",
+               "X-MACHINE-UUID ": "uuid d89647bf-ebdb-53c5-ae26-99d5256439c5",
+               "order_id":order_id
+               }
+    r = requests.get(url=my_url, headers=headers)
+    print(r.json())
+    order = r.json()
+    print("")
+    process_order = 0
+    del order[0]
+    print(order)
+    print("Next order!!!")
+
 #MACHINE FUNCTION
 def Machine_Out_of_Product():
     # ser.write(("OUT_OF_PROD" + "#").encode())
@@ -112,6 +123,10 @@ def Machine_ReleasePro(name, locate, qty):
     #test
     print(STO.Qty_find(STO, name))
 
+def Machine_No_Order():
+    #ser.write(("NO_ORDER" + "#").encode())
+    print("NO_ORDER")
+
 def Check_Order_Queue():
     global order
     global product_info
@@ -119,8 +134,7 @@ def Check_Order_Queue():
     global wait_release
     # check how many order
     if print(len(order)) == 0:
-        #ser.write(("NO_ORDER" + "#").encode())
-        print("No_Order")
+        Machine_No_Order()
     else:
         process_order = 1
         # check the first oder
@@ -140,11 +154,8 @@ def Check_Order_Queue():
             Machine_Out_of_Product()
 
         #Delete order in queue if not wait for release product
-        if wait_release != 1:
-            process_order = 0
-            del order[0]
-            print(order)
-            print("Next order!!!")
+        if wait_release == 0:
+            Request_Delete_Order()
 
 count30s = 0
 count_request = 0
@@ -158,25 +169,12 @@ while True:
         elif order and wait_release:
             processData("!TEST#")
         elif not order:
-            print("No_Order")
+            Machine_No_Order()
         if count30s <= 0:
             # send request to ask  order queue
             #Request_Oder_Queue()
             count30s = 5
         else:
             count30s -= 1
-    # my_url = "https://thay-tam.herokuapp.com/api/v1/machine/order_queue"
-    # headers = {"Content-Type": "application/json",
-    #            "X-MACHINE-UUID ": "uuid d89647bf-ebdb-53c5-ae26-99d5256439c5"}
-    # r = requests.get(url=my_url, headers=headers)
 
-
-    # print(r)
-    # print(r.json())
-    # order = r.json()
-    # print(order[0]["order_id"])
-
-
-    # print(STO.Qty_find(STO,"Dasani"))
-    # print(STO.Prod_add(STO,"Cream",5,1))
     time.sleep(1)
