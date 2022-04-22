@@ -88,16 +88,19 @@ def Request_Oder_Queue():
     print(r.json())
     order = r.json()
     print("")
-def Request_Delete_Order(order_id):
+def Request_Delete_Order(_order_id):
 
     global order
-
+    order_id = str(_order_id)
     my_url = "https://thay-tam.herokuapp.com//api/v1/machine/clear_order"
     headers = {"Content-Type": "application/json",
-               "X-MACHINE-UUID ": "uuid d89647bf-ebdb-53c5-ae26-99d5256439c5",
-               "order_id":order_id
+                "X-MACHINE-UUID": "uuid d89647bf-ebdb-53c5-ae26-99d5256439c5"
+
                }
-    r = requests.get(url=my_url, headers=headers)
+    body = {
+        'order_id': 2
+    }
+    r = requests.put(url=my_url, headers=headers, data=body )
     print(r.json())
     order = r.json()
     print("")
@@ -155,7 +158,7 @@ def Check_Order_Queue():
 
         #Delete order in queue if not wait for release product
         if wait_release == 0:
-            Request_Delete_Order()
+            Request_Delete_Order(order[0]["order_id"])
 
 count30s = 0
 count_request = 0
