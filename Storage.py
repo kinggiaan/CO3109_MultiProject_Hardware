@@ -1,8 +1,10 @@
 # class Storage:
-machine_storage = [{"name":"Dasani", "locate": 1, "qty": 0},
+machine_storage = [    {"name":"Dasani", "locate": 1, "qty": 0},
                        {"name":"NutriBoost", "locate": 2, "qty": 0},
                        {"name":"Sting", "locate": 3, "qty": 1},
-                       {"name":"Black Coffee", "locate": 4, "qty": 10}
+                       {"name":"Black Coffee", "locate": 4, "qty": 10},
+                       {"name":"Coca Cola", "locate": 5, "qty": 3},
+                       {"name":"Coca Light", "locate": 6, "qty": 3}
                    ]
 
 

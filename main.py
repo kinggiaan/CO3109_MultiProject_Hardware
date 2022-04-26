@@ -14,21 +14,20 @@ import requests
 import json
 import Storage as STO
 
-
 # #test
 # product_info = []
 # order = [{'machine_uuid': 'd89647bf-ebdb-53c5-ae26-99d5256439c5', 'order_uuid': '4ad6ece6-8e17-59ac-b140-a7afb9b77fbd', 'item': {'uuid': 'e5fb8ff4-9520-5118-8195-290803e57460', 'image': '/media/products/dasani.png', 'name': 'Dasani', 'price': 25}, 'quantity': 1}, {'machine_uuid': 'd89647bf-ebdb-53c5-ae26-99d5256439c5', 'order_uuid': '4ad6ece6-8e17-59ac-b140-a7afb9b77fbd', 'item': {'uuid': '072c8269-eda2-5085-8d5f-4811e5adb80d', 'image': '/media/products/sting.png', 'name': 'Sting', 'price': 35}, 'quantity': 2}, {'machine_uuid': 'd89647bf-ebdb-53c5-ae26-99d5256439c5', 'order_uuid': 'de6f909e-78c7-5be4-8e88-29aa60c4320a', 'item': {'uuid': 'ba50b773-0580-5da1-b4fa-56f01696a1cb', 'image': '/media/products/blackcoffee.png', 'name': 'Black Coffee', 'price': 70}, 'quantity': 1}, {'machine_uuid': 'd89647bf-ebdb-53c5-ae26-99d5256439c5', 'order_uuid': 'de6f909e-78c7-5be4-8e88-29aa60c4320a', 'item': {'uuid': 'baf9c355-a040-5f07-a669-a92e6245bf3e', 'image': '/media/products/nutriboost.png', 'name': 'NutriBoost', 'price': 30}, 'quantity': 1}]
 # process_order = 0
 # wait_release = 0
 
-global order_queue
-#real
-product_info = []
-order = []
-process_order = 0
-wait_release = 0
+# global order_queue
+# real
 
-def getPort():
+# order = []
+# process_order = 0
+# wait_release = 0
+
+def get_serial_port():
     ports = serial.tools.list_ports.comports()
     N = len(ports)
     commPort = "None"
@@ -42,29 +41,63 @@ def getPort():
     return commPort
 
 isMicrobitConnected = False
-if getPort() != "None":
+if get_serial_port() != "None":
     global ser
-    ser = serial.Serial( port=getPort(), baudrate=115200)
+    ser = serial.Serial( port=get_serial_port(), baudrate=115200)
     isMicrobitConnected = True
 
+# {
+#     "uuid": "baaa78dd-dbd4-4a2a-b0bd-7a071178d76c",
+#     "order": {
+#         "order_item_set": [
+#             {
+#                 "item": {
+#                     "uuid": "6d9349b0-7877-5f44-a863-888e273c3ab0",
+#                     "name": "Coca Cola"
+#                 },
+#                 "quantity": 1
+#             },
+#             {
+#                 "item": {
+#                     "uuid": "ce602c59-de2e-5dfb-8841-02e1d719b1d4",
+#                     "name": "Coca Light"
+#                 },
+#                 "quantity": 1
+#             }
+#         ]
+#     }
+# }
 
 mess = ""
-def processData(data):
-    global process_order
-    global product_info
-    global wait_release
+def process_data(data):
+  
+    
     data = data.replace("!", "")
     data = data.replace("#", "")
     splitData = data.split(":")
-    print(splitData)
-    splitData[0] = input(str)
-    if splitData[0] == "BUTTON" and process_order == 1 and wait_release ==1 : #de nha sp ra va relay nhay on off on
-        Machine_ReleasePro(product_info["name"], product_info["locate"], order[0]["quantity"])
-        Request_Delete_Order()
+    
+    #print(splitData)
+    #splitData[0] = input(str)
+    if splitData[0] == "TIME_OUT":
+         #Or hien tai da Time Out va quay ve hang doi
+         #ser."TIME_OUT_LCD"
+         #ser."NEXT_PRODUCT"
+         print("TIME_OUT_LCD")
+         print("NEXT_PRODUCT")
+    
+    # if splitData[0] == "DONE_ORDER" :
+    #     #ser."DONE_ORDER"
+    #     complete_order(order["uuid"])
+
+    # if splitData[0] == "BUTTON"  and wait_release : 
+    #     #de nha Order hien tai ra va relay nhay on off on
+    #     for product in order:
+    #         Machine_ReleasePro()
+    #         time.sleep(3)
 
 
 mess = ""
-def readSerial():
+def read_serial():
     bytesToRead = ser.inWaiting()
     if (bytesToRead > 0):
         global mess
@@ -72,51 +105,23 @@ def readSerial():
         while ("#" in mess) and ("!" in mess):
             start = mess.find("!")
             end = mess.find("#")
-            processData(mess[start:end + 1])
+            process_data(mess[start:end + 1])
             if (end == len(mess)):
                 mess = ""
             else:
                 mess = mess[end+1:]
-#ORDER QUEUE REQUEST
-def Request_Oder_Queue():
-    global order
-    my_url = "https://thay-tam.herokuapp.com/api/v1/machine/order_queue"
-    headers = {"Content-Type": "application/json",
-               "X-MACHINE-UUID ": "uuid d89647bf-ebdb-53c5-ae26-99d5256439c5"}
-    r = requests.get(url=my_url, headers=headers)
-    print(r.json())
-    order = r.json()
-    print("")
 
-def Request_Delete_Order(order_uuid):
-
-    global order
-    my_url = "https://thay-tam.herokuapp.com/api/v1/machine/clear_order"
-    # headers = {"Content-Type": "application/json",
-    #             "X-MACHINE-UUID": "uuid d89647bf-ebdb-53c5-ae26-99d5256439c5"
-    #            }
-    data = {
-        "order_uuid" : f"{order_uuid}"
-    }
-    r = requests.post(url=my_url, data=data)
-    print(r.json())
-    order = r.json()
-    print("")
-    process_order = 0
-    del order[0]
-    print(order)
-    print("Next order!!!")
 
 #MACHINE FUNCTION
 def Machine_Out_of_Product():
     # ser.write(("OUT_OF_PROD" + "#").encode())
     print("OUT_OF_PRODUCT")
 
-def Machine_Update_Temp_Moi():
-    print("Update temp request")
-    #ser.write(("RESTART_TEMP" + "#").encode())
+def Machine_Done_Order():
+    #ser."DONE_ORDER"
+    print("DONE_ORDER")
 
-def Machine_ReleasePro(name, locate, qty):
+def Machine_ReleasePro(name,locate , qty):
     #ser.write((str(locate) + "#").encode())
     #ser.write(("RELAY" + "#").encode())
     STO.Qty_realese(STO, name, qty)
@@ -128,69 +133,61 @@ def Machine_No_Order():
     #ser.write(("NO_ORDER" + "#").encode())
     print("NO_ORDER")
 
-def Check_Order_Queue():
-    global order
-    global product_info
-    global process_order
-    global wait_release
-    # check how many order
-    if print(len(order)) == 0:
-        Machine_No_Order()
-    else:
-        process_order = 1
-        # check the first oder
-        #print(order[0]["order_id"])
-        print(order[0]["item"]["name"])
-        if STO.Qty_find(STO, order[0]["item"]["name"]) >= order[0]["quantity"]:
-            product_info = STO.Product_find(STO, order[0]["item"]["name"])
+def Machine_Scan_Quantity(product):
+    if product["quantity"] >= STO.Qty_find(STO, product["name"]):
+        return False
+    return True
 
-            # Send to Microbit to chang Relay by Location of Product
-            #Machine_ReleasePro(product_info["name"], product_info["locate"], order[0]["quantity"])
+def get_next_order():
+    url = "https://thay-tam.herokuapp.com/api/v1/machine/next"
+    headers = {"Content-Type": "application/json",
+               "X-MACHINE-UUID ": "uuid d89647bf-ebdb-53c5-ae26-99d5256439c5"}
+    response = requests.get(url=url, headers=headers)
+    return response.status_code, response.json()
 
-            #Wait for button to Release Product
-            wait_release = 1
-            #Send request back sever to delete Order
+def get_item_queue(order_data):
+    item_set = order_data["order"]["order_item_set"]
+    return [{"name": i["item"]["name"], "quantity": i["quantity"]} for i in item_set]
 
-        else:
-            Machine_Out_of_Product()
+def invalidate_order(order_uuid):
+    url = "https://thay-tam.herokuapp.com/api/v1/machine/invalidate"
+    headers = {"Content-Type": "application/json"}
+    data = {"order_uuid": order_uuid}
+    response = requests.post(url=url, data=data, headers=headers)
+    return response.status_code
 
-        #Delete order in queue if not wait for release product
-        if wait_release == 0:
-            Request_Delete_Order(order[0]["order_uuid"])
+def complete_order(order_uuid):
+    url = "https://thay-tam.herokuapp.com/api/v1/machine/complete"
+    headers = {"Content-Type": "application/json"}
+    data = {"order_uuid": order_uuid}
+    response = requests.post(url=url, data=data, headers=headers)
+    return response.status_code
 
-
-# TODO Quy trình order trực tiếp trên PC
-# Thêm 1 file .py -> Hiện thị các sản phẩm đang có trong kho, nhận lệnh (class)
-# Hiện thi Menu lệnh  
-# TODO 1. Nhấn enter để khởi tạo 
-# TODO 2. Nhấn button để chọn order => thêm vào 1 queue
-# TODO 3. Nhấn enter để chốt order & nhả nước => chuyển order queue sang queue để nhả nước
-# TODO 3.5 Nhấn clear để xóa order
-# TODO 4. Lưu vào 1 data storage chung, lí tưởng là database, không thì dùng 1 queue ở mức độ global
-# TODO 5. 1 hàm chuyên đọc data storage rồi xử lý queue
-# TODO 6. Giả sử cấu trúc element trong queue là { 'online': '', **data }
-# TODO nếu đọc được online = True => sau khi nhả nước -> gọi clear_order
-
-
-count30s = 0
-count_request = 0
 while True:
-    #if isMicrobitConnected:
-    #test gateway
-    # TODO Hứng trigger từ button
-    if True:
-        #readSerial()
-        if order and not wait_release:
-            Check_Order_Queue()
-        elif order and wait_release:
-            processData("!TEST#")
-        elif not order:
-            Machine_No_Order()
-        if count30s <= 0:
-            # send request to ask  order queue
-            Request_Oder_Queue()
-            count30s = 5
-        else:
-            count30s -= 1
+    status_code, order = get_next_order()
+    if status_code == 200:
+        item_queue = get_item_queue(order)
 
-    time.sleep(1)
+        # Scan product
+        is_available = True
+        for product in item_queue:
+            if not Machine_Scan_Quantity(product):
+                is_available = False
+                Machine_Out_of_Product()
+                # REQUEST BAO KHONG DU HANG
+                # invalidate_order(order["uuid"]) # TODO
+                break
+
+        # de nha Order hien tai ra va relay nhay on off on
+        # release
+        if is_available:
+            for product in item_queue:
+                Machine_ReleasePro(product["name"], STO.Locate_find(STO,product["name"]),product["quantity"])
+                time.sleep(3)
+            # Wait 10s for User take order
+            time.sleep(7)
+            Machine_Done_Order()
+            # complete_order(order["uuid"]) # TODO
+    else:
+        Machine_No_Order()
+        time.sleep(5)
