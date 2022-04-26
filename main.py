@@ -15,18 +15,18 @@ import json
 import Storage as STO
 
 
-#test
-product_info = []
-order = [{'machine_uuid': 'd89647bf-ebdb-53c5-ae26-99d5256439c5', 'order_uuid': '4ad6ece6-8e17-59ac-b140-a7afb9b77fbd', 'item': {'uuid': 'e5fb8ff4-9520-5118-8195-290803e57460', 'image': '/media/products/dasani.png', 'name': 'Dasani', 'price': 25}, 'quantity': 1}, {'machine_uuid': 'd89647bf-ebdb-53c5-ae26-99d5256439c5', 'order_uuid': '4ad6ece6-8e17-59ac-b140-a7afb9b77fbd', 'item': {'uuid': '072c8269-eda2-5085-8d5f-4811e5adb80d', 'image': '/media/products/sting.png', 'name': 'Sting', 'price': 35}, 'quantity': 2}, {'machine_uuid': 'd89647bf-ebdb-53c5-ae26-99d5256439c5', 'order_uuid': 'de6f909e-78c7-5be4-8e88-29aa60c4320a', 'item': {'uuid': 'ba50b773-0580-5da1-b4fa-56f01696a1cb', 'image': '/media/products/blackcoffee.png', 'name': 'Black Coffee', 'price': 70}, 'quantity': 1}, {'machine_uuid': 'd89647bf-ebdb-53c5-ae26-99d5256439c5', 'order_uuid': 'de6f909e-78c7-5be4-8e88-29aa60c4320a', 'item': {'uuid': 'baf9c355-a040-5f07-a669-a92e6245bf3e', 'image': '/media/products/nutriboost.png', 'name': 'NutriBoost', 'price': 30}, 'quantity': 1}]
-process_order = 0
-wait_release = 0
-
-global order_queue
-# #real
+# #test
 # product_info = []
-# order = []
+# order = [{'machine_uuid': 'd89647bf-ebdb-53c5-ae26-99d5256439c5', 'order_uuid': '4ad6ece6-8e17-59ac-b140-a7afb9b77fbd', 'item': {'uuid': 'e5fb8ff4-9520-5118-8195-290803e57460', 'image': '/media/products/dasani.png', 'name': 'Dasani', 'price': 25}, 'quantity': 1}, {'machine_uuid': 'd89647bf-ebdb-53c5-ae26-99d5256439c5', 'order_uuid': '4ad6ece6-8e17-59ac-b140-a7afb9b77fbd', 'item': {'uuid': '072c8269-eda2-5085-8d5f-4811e5adb80d', 'image': '/media/products/sting.png', 'name': 'Sting', 'price': 35}, 'quantity': 2}, {'machine_uuid': 'd89647bf-ebdb-53c5-ae26-99d5256439c5', 'order_uuid': 'de6f909e-78c7-5be4-8e88-29aa60c4320a', 'item': {'uuid': 'ba50b773-0580-5da1-b4fa-56f01696a1cb', 'image': '/media/products/blackcoffee.png', 'name': 'Black Coffee', 'price': 70}, 'quantity': 1}, {'machine_uuid': 'd89647bf-ebdb-53c5-ae26-99d5256439c5', 'order_uuid': 'de6f909e-78c7-5be4-8e88-29aa60c4320a', 'item': {'uuid': 'baf9c355-a040-5f07-a669-a92e6245bf3e', 'image': '/media/products/nutriboost.png', 'name': 'NutriBoost', 'price': 30}, 'quantity': 1}]
 # process_order = 0
 # wait_release = 0
+
+global order_queue
+#real
+product_info = []
+order = []
+process_order = 0
+wait_release = 0
 
 def getPort():
     ports = serial.tools.list_ports.comports()
