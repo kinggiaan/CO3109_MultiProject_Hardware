@@ -80,20 +80,16 @@ def process_data(data):
     #splitData[0] = input(str)
     if splitData[0] == "TIME_OUT":
          #Or hien tai da Time Out va quay ve hang doi
-         #ser."TIME_OUT_LCD"
+         ser.write("TIME_OUT_LCD" + "#").encode()
          print("TIME_OUT_LCD")
          print("NEXT_PRODUCT")
     
     # if splitData[0] == "DONE_ORDER" :
-    #     #ser."DONE_ORDER"
+    #     #ser.write("DONE_ORDER"  "#").encode())
     #     complete_order(order["uuid"])
-
-    # if splitData[0] == "BUTTON"  and wait_release : 
-    #     #de nha Order hien tai ra va relay nhay on off on
-    #     for product in order:
-    #         Machine_ReleasePro()
-    #         time.sleep(3)
-
+    # if splitData[0] == "BUTTON":
+    #     ser.write("BUTTON"+"#").encode()
+    #     print("BUTTON")
 
 mess = ""
 def read_serial():
@@ -113,30 +109,36 @@ def read_serial():
 
 #MACHINE FUNCTION
 def Machine_Wait_taken():
-    #ser."TAKEN_YET"
+    ser.write(("TAKEN_YET" + "#").encode())
     print("WAIT_TAKEN")
+
 def Machine_Out_of_Product():
-    # ser.write(("OUT_OF_PROD" + "#").encode())
+    ser.write(("OUT_OF_PROD" + "#").encode())
     print("OUT_OF_PRODUCT")
 
+def Machine_Start_Oder():
+    ser.write(("START" + "#").encode())
+    print("START ORDER")
+
 def Machine_Done_Order():
-    #ser."DONE_ORDER"
+    ser.write(("DONE_ORDER" + "#").encode())
     print("DONE_ORDER")
 
 def Machine_ReleasePro(name,locate , qty):
-    #ser.write((str(locate) + "#").encode())
-    #ser.write(("RELAY" + "#").encode())
+    ser.write((str(locate) + "#").encode())
+    time.sleep(2)
+    ser.write(("RELAY" + "#").encode())
     STO.Qty_realese(STO, name, qty)
     print("Release " + str(name) + " " +str(qty))
     #test
     print(STO.Qty_find(STO, name))
 
 def Machine_No_Order():
-    #ser.write(("NO_ORDER" + "#").encode())
+    ser.write(("NO_ORDER" + "#").encode())
     print("NO_ORDER")
 
 def Machine_Scan_Quantity(product):
-    if product["quantity"] >= STO.Qty_find(STO, product["name"]):
+    if product["quantity"] > STO.Qty_find(STO, product["name"]):
         return False
     return True
 
@@ -161,36 +163,44 @@ def invalidate_order(order_uuid):
 def complete_order(order_uuid):
     url = "https://thay-tam.herokuapp.com/api/v1/machine/complete"
     headers = {"Content-Type": "application/json"}
-    data = {"order_uuid": order_uuid}
+    data = {"order_uuid": order_uuid[1:-1]}
     response = requests.post(url=url, data=data, headers=headers)
+    print(response.json())
     return response.status_code
 
 while True:
     #Microbit ser.read
-    status_code, order = get_next_order()
-    if status_code == 200:
-        item_queue = get_item_queue(order)
+    if isMicrobitConnected:
+        read_serial()
+        status_code, order = get_next_order()
+        if status_code == 200:
+            item_queue = get_item_queue(order)
 
-        # Scan product
-        is_available = True
-        for product in item_queue:
-            if not Machine_Scan_Quantity(product):
-                is_available = False
-                Machine_Out_of_Product()
-                # REQUEST BAO KHONG DU HANG
-                # invalidate_order(order["uuid"]) # TODO
-                break
-
-        # de nha Order hien tai ra va relay nhay on off on
-        # release
-        if is_available:
+            # Scan product
+            is_available = True
             for product in item_queue:
-                Machine_ReleasePro(product["name"], STO.Locate_find(STO,product["name"]),product["quantity"])
-                time.sleep(3)
-            # Wait 10s for User take order
-            time.sleep(7)
-            Machine_Done_Order()
-            # complete_order(order["uuid"]) # TODO
+                if not Machine_Scan_Quantity(product):
+                    is_available = False
+                    Machine_Out_of_Product()
+
+                    # REQUEST BAO KHONG DU HANG
+                    invalidate_order(order["uuid"])
+                    order.clear()
+                    break
+
+            # de nha Order hien tai ra va relay nhay on off on
+            # release
+            if is_available:
+                for product in item_queue:
+                    Machine_ReleasePro(product["name"], STO.Locate_find(STO,product["name"]),product["quantity"])
+                    time.sleep(3)
+                Machine_Wait_taken()
+                # Wait 10s for User take order
+                time.sleep(7)
+                Machine_Done_Order()
+                complete_order(order["uuid"])
+        else:
+            Machine_No_Order()
+            time.sleep(5)
     else:
-        Machine_No_Order()
-        time.sleep(5)
+        time.sleep(1)
