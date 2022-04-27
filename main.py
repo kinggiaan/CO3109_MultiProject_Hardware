@@ -147,7 +147,10 @@ def get_next_order():
     headers = {"Content-Type": "application/json",
                "X-MACHINE-UUID ": "uuid d89647bf-ebdb-53c5-ae26-99d5256439c5"}
     response = requests.get(url=url, headers=headers)
-    return response.status_code, response.json()
+    if response.status_code == 200:
+        return response.status_code, response.json()
+    else:
+        return (response.status_code, [])
 
 def get_item_queue(order_data):
     item_set = order_data["order"]["order_item_set"]
@@ -157,14 +160,14 @@ def invalidate_order(order_uuid):
     url = "https://thay-tam.herokuapp.com/api/v1/machine/invalidate"
     headers = {"Content-Type": "application/json"}
     data = {"order_uuid": order_uuid}
-    response = requests.post(url=url, data=data, headers=headers)
+    response = requests.post(url=url, data=json.dumps(data), headers=headers)
     return response.status_code
 
 def complete_order(order_uuid):
     url = "https://thay-tam.herokuapp.com/api/v1/machine/complete"
     headers = {"Content-Type": "application/json"}
-    data = {"order_uuid": order_uuid[1:-1]}
-    response = requests.post(url=url, data=data, headers=headers)
+    data = {"order_uuid": order_uuid}
+    response = requests.post(url=url, data=json.dumps(data), headers=headers)
     print(response.json())
     return response.status_code
 
