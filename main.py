@@ -81,7 +81,6 @@ def process_data(data):
     if splitData[0] == "TIME_OUT":
          #Or hien tai da Time Out va quay ve hang doi
          #ser."TIME_OUT_LCD"
-         #ser."NEXT_PRODUCT"
          print("TIME_OUT_LCD")
          print("NEXT_PRODUCT")
     
@@ -113,6 +112,9 @@ def read_serial():
 
 
 #MACHINE FUNCTION
+def Machine_Wait_taken():
+    #ser."TAKEN_YET"
+    print("WAIT_TAKEN")
 def Machine_Out_of_Product():
     # ser.write(("OUT_OF_PROD" + "#").encode())
     print("OUT_OF_PRODUCT")
@@ -164,6 +166,7 @@ def complete_order(order_uuid):
     return response.status_code
 
 while True:
+    #Microbit ser.read
     status_code, order = get_next_order()
     if status_code == 200:
         item_queue = get_item_queue(order)
